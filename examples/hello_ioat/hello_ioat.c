@@ -1,4 +1,6 @@
 // \ref https://doc.dpdk.org/guides-20.11/rawdevs/ioat.html
+// \ref
+// https://software.intel.com/content/www/us/en/develop/articles/memory-in-dpdk-part-2-deep-dive-into-iova.html
 
 #include <assert.h>
 #include <stdbool.h>
@@ -7,6 +9,7 @@
 
 #include "rte_ethdev.h"  // Not include this header will cause BUGs
 #include "rte_ioat_rawdev.h"
+#include "rte_malloc.h"
 #include "rte_rawdev.h"
 
 #define KB(x) ((x) << 10)
@@ -44,9 +47,14 @@ int main(int argc, char* argv[]) {
         assert(found);
     }
 
+    ret = rte_rawdev_selftest(dev_id);
+    assert(ret == 0);
+    printf("Self test passed!\n");
+
     // Configure the IOAT device
     struct rte_ioat_rawdev_config ioat_dev_conf = {
-        .ring_size = 512,      // size of job submission descriptor ring
+        // Noted that the ring size must be a power of two, between 64 and 4096.
+        .ring_size = 64,       // size of job submission descriptor ring
         .hdls_disable = false  // if set, ignore user-supplied handle params
     };
     struct rte_rawdev_info dev_info = {.dev_private = &ioat_dev_conf};
@@ -60,35 +68,42 @@ int main(int argc, char* argv[]) {
 
     // Prepare buffers
     size_t msg_size = KB(4);
-    char* src = malloc(msg_size);
+    char* src = rte_malloc(NULL, msg_size, 0);
     assert(src != NULL);
     memset(src, 0, msg_size);
 
-    char* gold_msg = "This is a gold!";
+    char* gold_msg = "Love and peace!";
     strcpy(src, gold_msg);
 
-    char* dst = malloc(msg_size);
+    char* dst = rte_malloc(NULL, msg_size, 0);
     assert(dst != NULL);
     memset(dst, 0, msg_size);
 
     // Submit a data copy request
-    ret = rte_ioat_enqueue_copy(dev_id, (uint64_t)src, (uint64_t)dst, msg_size,
+    ret = rte_ioat_enqueue_copy(dev_id, rte_malloc_virt2iova(src),
+                                rte_malloc_virt2iova(dst), sizeof gold_msg,
                                 (uintptr_t)src, (uintptr_t)dst);
     assert(ret == 1);
+    printf("Copy request submitted\n");
 
     // Kick the doorbell
     rte_ioat_perform_ops(dev_id);
+    printf("Doorbell kicked\n");
 
     // Poll for the completion
     int ne = 0, total_ops = 1;
     uintptr_t src_handle[1], dst_handle[1];
+    printf("Polling for the completion\n");
     do {
-        ret = rte_ioat_completed_ops(dev_id, 1, src_handle, dst_handle);
+        ret = rte_ioat_completed_ops(dev_id, 1, &src_handle[0], &dst_handle[0]);
         if (ret < 0) {
             printf("Poll for completion failed: %s\n", rte_strerror(rte_errno));
             assert(ret >= 0);
         }
         ne += ret;
+        // uint64_t num_failed_enq =
+        //    rte_rawdev_xstats_by_name_get(dev_id, "failed_enqueues", NULL);
+        // printf("failed_enqueues = %lu\n", num_failed_enq);
     } while (ne < total_ops);
     assert(src_handle[0] == (uintptr_t)src && dst_handle[0] == (uintptr_t)dst);
 
