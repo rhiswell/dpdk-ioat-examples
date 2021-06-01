@@ -1,0 +1,8 @@
+{
+    "editor.tabSize": 4,
+    "[makefile]": {
+        "editor.tabSize": 8
+    },
+    "C_Cpp.formatting": "clangFormat",
+    "editor.formatOnSave": true
+}
