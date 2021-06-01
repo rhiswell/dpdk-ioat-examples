@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright(c) 2010-2014 Intel Corporation
+# Copyright(c) 2019 Intel Corporation
 
 # binary name
-APP = hello_dpdk
+APP = ioat_fwd
 
 # all source are stored in SRCS-y
-SRCS-y := hello_dpdk.c
+SRCS-y := ioat_fwd.c
 
 # Build using pkg-config variables if possible
 ifneq ($(shell pkg-config --exists libdpdk && echo 0),0)
