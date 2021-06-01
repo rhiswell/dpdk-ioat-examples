@@ -4,5 +4,14 @@
         "editor.tabSize": 8
     },
     "C_Cpp.formatting": "clangFormat",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "rte_ioat_rawdev.h": "c",
+        "rte_rawdev.h": "c",
+        "stdbool.h": "c",
+        "rte_malloc.h": "c",
+        "rte_ethdev.h": "c",
+        "rte_ioat_rawdev_fns.h": "c",
+        "rte_common.h": "c"
+    }
 }
