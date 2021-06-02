@@ -13,6 +13,8 @@
         "rte_ethdev.h": "c",
         "rte_ioat_rawdev_fns.h": "c",
         "rte_common.h": "c",
-        "rte_log.h": "c"
+        "rte_log.h": "c",
+        "rte_vfio.h": "c",
+        "rte_dev.h": "c"
     }
 }

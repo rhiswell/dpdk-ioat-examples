@@ -3,8 +3,10 @@
 // https://software.intel.com/content/www/us/en/develop/articles/memory-in-dpdk-part-2-deep-dive-into-iova.html
 
 #include <assert.h>
+#include <malloc.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "rte_dev.h"
@@ -68,20 +70,29 @@ int main(int argc, char *argv[]) {
     assert(ret == 0);
 
     char *gold_msg = "Hello IOAT!";
-    size_t msg_size = KB(1);
-    assert(msg_size >= sizeof gold_msg);
+    size_t buf_size = KB(4);
+    assert(buf_size >= sizeof gold_msg);
 
     // Prepare buffers
-    char *src = rte_zmalloc(NULL, msg_size, 0),
-         *dst = rte_zmalloc(NULL, msg_size, 0);
+    char *src = memalign(KB(4), buf_size), *dst = memalign(KB(4), buf_size);
     assert(src != NULL && dst != NULL);
+
+    // Register them to the IOMMU with the DPDK-provided APIs
+    ret = rte_extmem_register(src, buf_size, NULL, 0, KB(4));
+    assert(ret == 0);
+    ret = rte_dev_dma_map(dev_ctx, src, (uint64_t)src, buf_size);
+    assert(ret == 0);
+
+    ret = rte_extmem_register(dst, buf_size, NULL, 0, KB(4));
+    assert(ret == 0);
+    ret = rte_dev_dma_map(dev_ctx, dst, (uint64_t)dst, buf_size);
+    assert(ret == 0);
 
     strcpy(src, gold_msg);
 
     // Submit a data copy request
-    ret = rte_ioat_enqueue_copy(dev_id, rte_malloc_virt2iova(src),
-                                rte_malloc_virt2iova(dst), msg_size,
-                                (uintptr_t)src, (uintptr_t)dst);
+    ret = rte_ioat_enqueue_copy(dev_id, (uintptr_t)src, (uintptr_t)dst,
+                                buf_size, (uintptr_t)src, (uintptr_t)dst);
     assert(ret == 1);
     printf("Copy request submitted\n");
 
