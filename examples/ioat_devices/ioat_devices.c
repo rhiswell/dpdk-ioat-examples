@@ -12,14 +12,10 @@
 #include "rte_malloc.h"
 #include "rte_rawdev.h"
 
-#define KB(x) ((x) << 10)
-#define MB(x) ((x) << 20)
-#define GB(x) ((x) << 30)
-
 int main(int argc, char* argv[]) {
     int ret;
 
-    /* Init EAL */
+    // Init the EAL
     ret = rte_eal_init(argc, argv);
     if (ret < 0) rte_exit(EXIT_FAILURE, "Invalid EAL arguments\n");
     argc -= ret;

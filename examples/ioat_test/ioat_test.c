@@ -23,7 +23,7 @@ static unsigned short expected_ring_size[MAX_SUPPORTED_RAWDEVS];
 int main(int argc, char *argv[]) {
     int ret;
 
-    /* Init EAL */
+    // Init the EAL
     ret = rte_eal_init(argc, argv);
     if (ret < 0) rte_exit(EXIT_FAILURE, "Invalid EAL arguments\n");
     argc -= ret;
