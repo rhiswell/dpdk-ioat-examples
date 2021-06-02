@@ -1,0 +1,3 @@
+[submodule "benchmarks/tinymembench"]
+	path = benchmarks/tinymembench
+	url = https://github.com/ssvb/tinymembench.git
