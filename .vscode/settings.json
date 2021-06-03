@@ -16,5 +16,6 @@
         "rte_log.h": "c",
         "rte_vfio.h": "c",
         "rte_dev.h": "c"
-    }
+    },
+    "remote.autoForwardPorts": false
 }

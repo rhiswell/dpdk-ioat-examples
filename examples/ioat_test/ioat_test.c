@@ -8,7 +8,6 @@
 
 #include "rte_ioat_rawdev.h"
 #include "rte_rawdev.h"
-//#include "ioat_private.h"
 
 #define MAX_SUPPORTED_RAWDEVS 64
 #define TEST_SKIPPED 77
@@ -308,7 +307,7 @@ int ioat_rawdev_test(uint16_t dev_id) {
         rte_rawdev_xstats_get(dev_id, ids, stats, nb_xstats);
         for (j = 0; j < nb_xstats; j++)
             printf("%s: %" PRIu64 "   ", snames[j].name, stats[j]);
-        printf("\r");
+        printf("\n");
     }
     printf("\n");
 
@@ -322,7 +321,7 @@ int ioat_rawdev_test(uint16_t dev_id) {
         rte_rawdev_xstats_get(dev_id, ids, stats, nb_xstats);
         for (j = 0; j < nb_xstats; j++)
             printf("%s: %" PRIu64 "   ", snames[j].name, stats[j]);
-        printf("\r");
+        printf("\n");
     }
     printf("\n");
 

@@ -9,7 +9,6 @@
 
 #include "rte_ethdev.h"  // Not include this header will cause BUGs
 #include "rte_ioat_rawdev.h"
-#include "rte_malloc.h"
 #include "rte_rawdev.h"
 
 int main(int argc, char* argv[]) {
