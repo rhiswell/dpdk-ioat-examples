@@ -77,13 +77,19 @@ int main(int argc, char *argv[]) {
     char *src = memalign(KB(4), buf_size), *dst = memalign(KB(4), buf_size);
     assert(src != NULL && dst != NULL);
 
-    // Register them to the IOMMU with the DPDK-provided APIs
-    ret = rte_extmem_register(src, buf_size, NULL, 0, KB(4));
+    // Register memories into DPDK otherwise DPDK rejects for dma mapping. The
+    // question is why should we first register these memories into DPDK?
+    ret = rte_extmem_register(src, buf_size, NULL, 1, KB(4));
     assert(ret == 0);
+    // This will request the kernel module vfio_pci to register memories to
+    // IOMMU. For each request, vfio_pci will first pin all the memories, the
+    // get the mappings from the page table, and finally write them into the
+    // IOMMU. This process can be traced with perf, ie perf trace --no-syscall
+    // -e iommu:* -- progname args
     ret = rte_dev_dma_map(dev_ctx, src, (uint64_t)src, buf_size);
     assert(ret == 0);
 
-    ret = rte_extmem_register(dst, buf_size, NULL, 0, KB(4));
+    ret = rte_extmem_register(dst, buf_size, NULL, 1, KB(4));
     assert(ret == 0);
     ret = rte_dev_dma_map(dev_ctx, dst, (uint64_t)dst, buf_size);
     assert(ret == 0);
