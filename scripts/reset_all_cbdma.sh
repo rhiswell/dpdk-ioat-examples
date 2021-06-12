@@ -8,7 +8,7 @@ sudo modprobe vfio_pci
 
 # Bind a CBDMA device with the vfio-pci driver. All the CBDMAs can also be
 # queried with the dpdk-devbind tool.
-ioat_dev_list=$(dpdk-devbind.py --status-dev misc | grep "Crystal Beach DMA" | awk '{print $1}' | head -n8)
+ioat_dev_list=$(dpdk-devbind.py --status-dev misc | grep "Crystal Beach DMA" | awk '{print $1}')
 for ioat_dev in ${ioat_dev_list}; do
     sudo dpdk-devbind.py -b ioatdma $ioat_dev
     sudo dpdk-devbind.py -b vfio-pci $ioat_dev
